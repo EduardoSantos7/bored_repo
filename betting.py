@@ -1,5 +1,4 @@
 from sympy import symbols, Eq, solve
-from sympy import MatrixSymbol, Matrix
 
 
 def find_surebet(*odds):
@@ -21,9 +20,11 @@ def beat_bookies(odds1, odds2, total_stake):
     profit2 = odds2*stakes[y] - total_stake
     benefit1 = f'{profit1 / total_investment * 100:.2f}%'
     benefit2 = f'{profit2 / total_investment * 100:.2f}%'
-    dict_gabmling = {'Stake1': stakes[x], 'Stake2': stakes[y], 'Profit1': profit1, 'Profit2': profit2,
+    dict_gabmling = {'Stake1': stakes[x], 'Stake2': stakes[y],
+                     'Profit1': profit1, 'Profit2': profit2,
                      'Benefit1': benefit1, 'Benefit2': benefit2}
     return dict_gabmling
 
 
-print(beat_bookies([2, 2.1], 100))
+# print(beat_bookies([2, 2.1], 100))
+print(find_surebet(1.53, 2.4))
