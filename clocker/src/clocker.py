@@ -1,3 +1,6 @@
+import os
+import logging
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -5,6 +8,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as expected_conditions
+
+from utils.postman.postman import send_email
 
 
 class Clocker:
@@ -17,6 +22,14 @@ class Clocker:
         "push_out_button": "ContentPlaceHolder1_lbPunchOut",
         "action_notification": "lblPunchNotification"
     }
+    WAIT_ELEMENT = 15
+
+    def __init__(self):
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.headless = False
+        self.driver = webdriver.Chrome(
+            executable_path="clocker/src/chromedriver", chrome_options=chrome_options)
+        self.url_base = "https://app1.trackmytime.com/onestar"
 
     def login(self):
         # Login
@@ -34,14 +47,14 @@ class Clocker:
 
         login_button = WebDriverWait(self.driver, self.WAIT_ELEMENT).until(
             expected_conditions.presence_of_element_located(
-                (By.XPATH, self.XPATHS.get('login_button'))
+                (By.ID, self.IDS.get('login_button'))
             )
         )
 
         user_box.clear()
-        user_box.send_keys()
+        user_box.send_keys(os.getenv('CLOCKER_USER'))
         pass_box.clear()
-        pass_box.send_keys()
+        pass_box.send_keys(os.getenv('CLOCKER_PASS'))
         login_button.click()
 
     def toggle_status(self):
@@ -55,12 +68,12 @@ class Clocker:
             )
 
             if push_in_button.isEnabled():
-                print("Push In button is enabled, let's push in")
+                logging.info("Push In button is enabled, let's push in")
                 push_in_button.click()
                 return
 
         except TimeoutException as e:
-            print(e)
+            logging.error(e)
 
         try:
             push_out_button = WebDriverWait(self.driver, self.WAIT_ELEMENT).until(
@@ -70,12 +83,12 @@ class Clocker:
             )
 
             if push_out_button.isEnabled():
-                print("Push Out button is enabled, let's push in")
+                logging.info("Push Out button is enabled, let's push in")
                 push_out_button.click()
                 return
 
         except TimeoutException as e:
-            print(e)
+            logging.error(e)
 
     def get_message(self):
         try:
@@ -88,13 +101,17 @@ class Clocker:
             return action_notification.text.strip()
 
         except TimeoutException as e:
-            print(e)
+            logging.error(e)
 
     def process(self):
-        self.driver.get("https://app1.trackmytime.com/onestar")
+        try:
+            self.driver.get(self.url_base)
 
-        self.login()
+            self.login()
+            self.toggle_status()
 
-        self.toggle_status()
+            message = self.get_message()
 
-        message = self.get_message()
+            send_email(message)
+        except Exception as e:
+            logging.error(e)
