@@ -71,6 +71,8 @@ class Clocker:
                 logging.info("Push In button is enabled, let's push in")
                 push_in_button.click()
                 return
+            else:
+                logging.info("Push In button already clicked")
 
         except TimeoutException as e:
             logging.error(e)
