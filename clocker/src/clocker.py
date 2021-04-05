@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 import os
+import time
 import logging
 
 from selenium import webdriver
@@ -18,7 +21,7 @@ class Clocker:
         'user_box': 'txtUserName',
         "pass_box": 'txtPassword',
         "login_button": 'loginIn',
-        "push_in_button": "ContentPlaceHolder1_lbPunchInDis",
+        "push_in_button": "ContentPlaceHolder1_lbPunchIn",
         "push_out_button": "ContentPlaceHolder1_lbPunchOut",
         "action_notification": "lblPunchNotification"
     }
@@ -26,7 +29,7 @@ class Clocker:
 
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.headless = False
+        chrome_options.headless = True
         self.driver = webdriver.Chrome(
             executable_path="clocker/src/chromedriver", chrome_options=chrome_options)
         self.url_base = "https://app1.trackmytime.com/onestar"
@@ -67,7 +70,7 @@ class Clocker:
                 )
             )
 
-            if push_in_button.isEnabled():
+            if push_in_button.is_enabled():
                 logging.info("Push In button is enabled, let's push in")
                 push_in_button.click()
                 return
@@ -76,7 +79,7 @@ class Clocker:
 
         except TimeoutException as e:
             logging.error(e)
-
+        # return
         try:
             push_out_button = WebDriverWait(self.driver, self.WAIT_ELEMENT).until(
                 expected_conditions.presence_of_element_located(
@@ -84,7 +87,7 @@ class Clocker:
                 )
             )
 
-            if push_out_button.isEnabled():
+            if push_out_button.is_enabled():
                 logging.info("Push Out button is enabled, let's push in")
                 push_out_button.click()
                 return
@@ -94,6 +97,7 @@ class Clocker:
 
     def get_message(self):
         try:
+            time.sleep(5)
             action_notification = WebDriverWait(self.driver, self.WAIT_ELEMENT).until(
                 expected_conditions.presence_of_element_located(
                     (By.ID, self.IDS.get('action_notification'))
@@ -117,3 +121,6 @@ class Clocker:
             send_email(message)
         except Exception as e:
             logging.error(e)
+            send_email(f"Error in Clocker: {e}")
+
+        self.driver.close()
