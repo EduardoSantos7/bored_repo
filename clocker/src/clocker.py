@@ -71,14 +71,14 @@ class Clocker:
             )
 
             if push_in_button.is_enabled():
-                logging.info("Push In button is enabled, let's push in")
+                print("Push In button is enabled, let's push in")
                 push_in_button.click()
                 return
             else:
-                logging.info("Push In button already clicked")
+                print("Push In button already clicked")
 
         except TimeoutException as e:
-            logging.error(e)
+            print(e)
         # return
         try:
             push_out_button = WebDriverWait(self.driver, self.WAIT_ELEMENT).until(
@@ -88,12 +88,12 @@ class Clocker:
             )
 
             if push_out_button.is_enabled():
-                logging.info("Push Out button is enabled, let's push in")
+                print("Push Out button is enabled, let's push in")
                 push_out_button.click()
                 return
 
         except TimeoutException as e:
-            logging.error(e)
+            print(e)
 
     def get_message(self):
         try:
@@ -107,7 +107,7 @@ class Clocker:
             return action_notification.text.strip()
 
         except TimeoutException as e:
-            logging.error(e)
+            print(e)
 
     def process(self):
         try:
@@ -120,7 +120,7 @@ class Clocker:
 
             send_email(message)
         except Exception as e:
-            logging.error(e)
+            print(e)
             send_email(f"Error in Clocker: {e}")
 
         self.driver.close()
